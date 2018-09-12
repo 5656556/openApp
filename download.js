@@ -1,27 +1,9 @@
-import validateRules from './validateRules';
-import axios from 'utils/axios';
-const ROOTPATH = process.env.apis.default.path;
-const GET_DOWNLOAD_URL =  `${ROOTPATH}/download/h5/v1/url`;
-let androidDownloadUrl = '';
+import validateRules from './validateRules';  //常用的校验
+import axios from 'utils/axios';  //axios请求
+const ROOTPATH = process.env.apis.default.path; //请求后台的根路径
+const GET_DOWNLOAD_URL =  `${ROOTPATH}/download/h5/v1/url`; //获取下载地址的接口
+let androidDownloadUrl = '';  
 let param = undefined;
-
-function goToDownload (callback) {
-  return function (time) {
-    if (time != 1) {
-      callCallback('download');
-        // 新下载地址, 安卓、iOS 通用
-        window.location.href = 'http://t.cn/R3rLZdU';
-    } else {
-      callCallback('open');
-    }
-
-    function callCallback (result) {
-      if (callback && typeof callback === 'function') {
-        callback(result)
-      }
-    }
-  };
-}
 
 /**
  * 尝试打开 APP, 如果失败就尝试下载
@@ -31,7 +13,7 @@ function goToDownload (callback) {
  */
 function tryOpen (callback) {
   if(param){
-    if (validateRules.isIOS()) { //ios
+    if (validateRules.isIOS()) {
       openApp(`com.finupgroup.finupplatform://${param}`, downloadApp);
     }
     if (validateRules.isAndroid()) {
@@ -76,8 +58,8 @@ function openApp(openUrl, callback) {
 }
 
 async function init(channel){
-  let {code,result} = await axios.post(GET_DOWNLOAD_URL,{'UA':navigator.userAgent,'token':'',channel:channel});
-  if(code == 200){
+  let {code,result} = await axios.post(GET_DOWNLOAD_URL,{'UA':navigator.userAgent,channel:channel});
+  if(code === '200'){
     androidDownloadUrl = result.downloadUrl;
     if(result.hasOwnProperty('jumpType')){
       let {jumpType,jumpPage,forwardUrl} = result;
@@ -99,15 +81,10 @@ function downloadApp() {
     location.href = 'http://phobos.apple.com/WebObjects/MZStore.woa/wa/viewSoftware?mt=8&id=1289571562';
   }
   if (validateRules.isAndroid()) {
-    //init(channel);
     if(androidDownloadUrl){
       window.location.href = androidDownloadUrl;
     }
   }
 }
 
-export {tryOpen};
-
-export {downloadApp};
-
-export {init};
+export {tryOpen,downloadApp,init};
